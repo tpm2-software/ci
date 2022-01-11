@@ -1,0 +1,43 @@
+name: 'Coverity Action'
+
+description: 'Action to run Coverity scans.'
+
+inputs:
+  PROJECT_NAME:
+    required: true
+  ENABLE_COVERITY:
+    required: true
+  REPO_BRANCH:
+    required: true
+  REPO_NAME:
+    required: true
+  TPM2TOOLS_BRANCH:
+    required: false
+  TPM2TSS_BRANCH:
+    required: false
+  CC:
+    required: true
+  DOCKER_IMAGE:
+    required: true
+  COVERITY_SCAN_TOKEN:
+    required: true
+  COVERITY_SUBMISSION_EMAIL:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Launch Container
+      env:
+        PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
+        ENABLE_COVERITY: ${{ inputs.ENABLE_COVERITY }}
+        REPO_BRANCH: ${{ inputs.REPO_BRANCH }}
+        REPO_NAME: ${{ inputs.REPO_NAME }}
+        TPM2TOOLS_BRANCH: ${{ inputs.TPM2TOOLS_BRANCH }}
+        TPM2TSS_BRANCH: ${{ inputs.TPM2TSS_BRANCH }}
+        CC: ${{ inputs.CC }}
+        DOCKER_IMAGE: ${{ inputs.DOCKER_IMAGE }}
+        COVERITY_SCAN_TOKEN: ${{ inputs.COVERITY_SCAN_TOKEN }}
+        COVERITY_SUBMISSION_EMAIL: ${{ inputs.COVERITY_SUBMISSION_EMAIL }}
+      run: ${{ github.action_path }}/../scripts/ci.sh
+      shell: bash
