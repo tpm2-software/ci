@@ -35,6 +35,8 @@ inputs:
     required: false
   TPM2_TSS_VERSION:
     required: false
+  MULTIARCH_BUILD:
+    required: false
 
 runs:
   using: composite
@@ -57,5 +59,6 @@ runs:
         MAKE_TARGET: ${{ inputs.MAKE_TARGET }}
         ENABLE_FUZZING: ${{ inputs.ENABLE_FUZZING }}
         TPM2_TSS_VERSION: ${{ inputs.TPM2_TSS_VERSION }}
+        MULTIARCH_BUILD: ${{ inputs.MULTIARCH_BUILD }}
       run: ${{ github.action_path }}/../scripts/ci.sh
       shell: bash
