@@ -21,6 +21,8 @@ inputs:
     required: false
   WITH_CRYPTO:
     required: false
+  WITH_TCTI:
+    required: false
   ENABLE_COVERAGE:
     required: false
   GEN_FUZZ:
@@ -52,6 +54,7 @@ runs:
         SCANBUILD: ${{ inputs.SCANBUILD }}
         TEST_TCTI_CONFIG: ${{ inputs.TEST_TCTI_CONFIG }}
         WITH_CRYPTO: ${{ inputs.WITH_CRYPTO }}
+        WITH_TCTI: ${{ inputs.WITH_TCTI }}
         ENABLE_COVERAGE: ${{ inputs.ENABLE_COVERAGE }}
         GEN_FUZZ: ${{ inputs.GEN_FUZZ }}
         CXX: ${{ inputs.CXX }}
