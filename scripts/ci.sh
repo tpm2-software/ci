@@ -21,7 +21,10 @@ fi
 # We want those changes IN the docker image, so use the -v option to mount the
 # project repo in the docker image.
 #
-# Also, pass in any env variables required for the build via .ci/docker.env file
+# Also, pass in any env variables required for the build via .ci/docker.env
+# file. For easy reproducibility, this is done explicitly via `--env VAR1=value1
+# --env VAR2=value2`. For local development, you can alternatively pass
+# `--env-file .ci/docker.env`.
 #
 # Execute the build and test procedure by running .ci/docker.run
 #
@@ -40,7 +43,55 @@ else
   script="$DOCKER_SCRIPT"
 fi
 
-docker run --cap-add=SYS_PTRACE $ci_env --env-file .ci/docker.env \
+# Converts a Docker environment file into a string of --env arguments for docker run.
+#
+# Example:
+#   Given a file with:
+#     # Comment
+#     VAR1=value1
+#     VAR2
+#
+#   Output:
+#     --env VAR1=value1 --env VAR2=<current_env_value>
+env_args_from_docker_env_file() {
+    envfile=$1
+    out=""
+
+    # read last line even if no trailing newline:
+    while IFS= read -r line || [ -n "$line" ]; do
+        # trim leading whitesspace
+        line=${line#"${line%%[!	 ]*}"}
+        # trim trailing whitespace
+        line=${line%"${line##*[!	 ]}"}
+
+        # skip empty or comment
+        [ -z "$line" ] && continue
+        case "$line" in
+            \#*) continue ;;
+        esac
+
+        case "$line" in
+            *=*)
+                key=${line%%=*}
+                val=${line#*=}
+                [ -z "$val" ] && continue
+                ;;
+            *)
+                key=$line
+                # get value from environment (indirect expansion via eval)
+                val=$(eval "printf '%s' \"\${$key-}\"")
+                [ -z "$val" ] && continue
+                ;;
+        esac
+
+        out="$out --env $key=$val"
+    done < "$envfile"
+
+    # print without leading space
+    printf '%s\n' "${out# }"
+}
+
+docker run --cap-add=SYS_PTRACE $ci_env $(env_args_from_docker_env_file .ci/docker.env) \
   -v "$(pwd):$DOCKER_BUILD_DIR" "ghcr.io/tpm2-software/$DOCKER_IMAGE" \
   /bin/bash -c "$DOCKER_BUILD_DIR/.ci/$script"
 
